@@ -45,7 +45,6 @@ import org.luaj.vm2.lib.jse.JsePlatform;
  */
 public class ChdkPtpJ {
     private final Globals globals;
-    private LuaValue main;
 
     public ChdkPtpJ(Camera camera, String luaScriptsDir) throws Exception {
         // initialize Lua standard packages
@@ -67,7 +66,10 @@ public class ChdkPtpJ {
         LoadState.install(globals);
         LuaC.install(globals);
 
-        main = globals.loadfile(luaScriptsDir + "/main.lua");
+        /**
+         * Call modified main.lua for setup functions and initial data.
+         */
+        globals.loadfile(luaScriptsDir + "/m.lua").call();
     }
 
     /**
@@ -80,11 +82,12 @@ public class ChdkPtpJ {
         globals.get("table").set("maxn", maxn);
     }
 
-    public void execute() throws Exception {
-        main.call();
+    public void executeCliFunction(String function, LuaTable args) throws Exception {
+        LuaValue func = globals.get("cli").get("names").get(function).get("func");
+        System.out.println(func);
 
-        // LuaValue zzz= globals.get("function_to_run");
-        // LuaValue r= zzz.call();
+        LuaValue r = func.call(LuaValue.NIL, args);
+        System.out.println("done: " + r);
     }
 
     public static OneArgFunction maxn = new OneArgFunction() {
