@@ -1,6 +1,8 @@
 import org.alex73.chdkptpj.camera.Camera;
 import org.alex73.chdkptpj.camera.CameraFactory;
 import org.alex73.chdkptpj.lua.ChdkPtpJ;
+import org.luaj.vm2.LuaTable;
+import org.luaj.vm2.LuaValue;
 
 public class TestRemoteShoot2 {
 
@@ -22,7 +24,14 @@ public class TestRemoteShoot2 {
         // Thread.sleep(10);
         // }
 
-        fr.execute();
+        LuaTable p1 = new LuaTable();
+        fr.executeCliFunction("connect", p1);
+
+        LuaTable p = new LuaTable();
+        p.set("img", LuaValue.valueOf(true));
+        p.set("raw", LuaValue.valueOf(true));
+        p.set(1, LuaValue.valueOf("/tmp/123/"));
+        fr.executeCliFunction("remoteshoot", p);
     }
 
 }
