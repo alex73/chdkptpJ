@@ -62,6 +62,10 @@ public class Camera {
         return connection;
     }
 
+    public boolean isConnected() {
+        return connection != null;
+    }
+
     /**
      * Connect to camera.
      */

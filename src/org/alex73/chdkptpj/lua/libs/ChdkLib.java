@@ -34,8 +34,11 @@ public class ChdkLib extends ALuaBaseLib {
     public static final int CHDKPTP_VERSION_MAJOR = 0;
     public static final int CHDKPTP_VERSION_MINOR = 5;
 
-    public ChdkLib() {
+    private final ChdkConnection conn;
+
+    public ChdkLib(ChdkConnection conn) {
         super("chdk");
+        this.conn = conn;
     }
 
     public ZeroArgFunction host_api_version = new ZeroArgFunction() {
@@ -76,10 +79,7 @@ public class ChdkLib extends ALuaBaseLib {
      */
     public OneArgFunction connection = new OneArgFunction() {
         public LuaValue call(LuaValue arg) {
-            LuaTable table = new LuaTable();
-            table.set("connect", connect);
-            return table;
-            // return new Connection();
+            return conn;
         }
     };
     /*

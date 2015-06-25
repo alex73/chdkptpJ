@@ -51,9 +51,10 @@ public class ChdkPtpJ {
         globals = JsePlatform.standardGlobals();
 
         // add custom Lua packages that chdkptp implemented
+        ChdkConnection connection = new ChdkConnection(camera);
         globals.load(new SysLib());
-        globals.load(new ChdkConnection(camera));
-        globals.load(new ChdkLib());
+        globals.load(connection);
+        globals.load(new ChdkLib(connection));
         globals.load(new Lbuf());
         globals.load(new CoreVar());
         globals.load(new GuiSys());
@@ -69,7 +70,7 @@ public class ChdkPtpJ {
         /**
          * Call modified main.lua for setup functions and initial data.
          */
-        globals.loadfile(luaScriptsDir + "/m.lua").call();
+        globals.loadfile("lua/prepare.lua").call();
     }
 
     /**
@@ -83,11 +84,29 @@ public class ChdkPtpJ {
     }
 
     public void executeCliFunction(String function, LuaTable args) throws Exception {
-        LuaValue func = globals.get("cli").get("names").get(function).get("func");
-        System.out.println(func);
+        LuaValue part = globals.get("cli").get("names").get(function);
+        LuaValue defaultArgs = part.get("args").get("defs");
+        LuaValue func = part.get("func");
 
-        LuaValue r = func.call(LuaValue.NIL, args);
+        setDefaults(args, defaultArgs);
+
+        Varargs r = func.invoke(LuaValue.NIL, args);
         System.out.println("done: " + r);
+    }
+
+    private void setDefaults(LuaValue values, LuaValue defaults) {
+        LuaValue k = LuaValue.NIL;
+        while (true) {
+            Varargs n = defaults.next(k);
+            if ((k = n.arg1()).isnil())
+                break;
+            LuaValue v = n.arg(2);
+            LuaValue valuesV = values.get(k);
+            if (valuesV.isnil()) {
+                values.set(k, v);
+            }
+        }
+
     }
 
     public static OneArgFunction maxn = new OneArgFunction() {

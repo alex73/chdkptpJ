@@ -22,7 +22,10 @@ package org.alex73.chdkptpj.lua.libs;
 
 import java.io.File;
 
+import org.luaj.vm2.LuaBoolean;
 import org.luaj.vm2.LuaValue;
+import org.luaj.vm2.Varargs;
+import org.luaj.vm2.lib.LibFunction;
 import org.luaj.vm2.lib.TwoArgFunction;
 
 public class LFS extends ALuaBaseLib {
@@ -39,6 +42,29 @@ public class LFS extends ALuaBaseLib {
                 return LuaValue.NONE;
             }
             return LuaValue.NONE;
+        }
+    };
+
+    public LibFunction mkdir = new LibFunction() {
+        @Override
+        public Varargs invoke(Varargs varargs) {
+            LuaValue path = varargs.arg1();
+            File f = new File(path.tojstring());
+            if (f.exists()) {
+                if (f.isDirectory()) {
+                    return LuaValue.TRUE;
+                } else {
+                    return LuaValue.varargsOf(LuaBoolean.FALSE,
+                            LuaValue.valueOf("'" + path + "' exist but not is directory"));
+                }
+            }
+            if (f.mkdirs()) {
+                // created
+                return LuaValue.TRUE;
+            } else {
+                return LuaValue.varargsOf(LuaBoolean.FALSE,
+                        LuaValue.valueOf("Impossible to create dir '" + path + "'"));
+            }
         }
     };
 }

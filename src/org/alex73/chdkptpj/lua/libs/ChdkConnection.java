@@ -54,7 +54,6 @@ public class ChdkConnection extends ALuaBaseLib {
     private static Logger LOG = Logger.getLogger(ChdkConnection.class);
 
     private Camera camera;
-    private boolean connected;
     private long write_count, read_count;
     private Integer currentScriptId;
 
@@ -70,8 +69,8 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public ZeroArgFunction is_connected = new ZeroArgFunction() {
         public LuaValue call() {
-            LOG.fine("is_connected: " + connected);
-            return LuaValue.valueOf(connected);
+            LOG.fine("is_connected: " + camera.isConnected());
+            return LuaValue.valueOf(camera.isConnected());
         }
     };
 
@@ -84,8 +83,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public VarArgFunction connect = new VarArgFunction() {
         public Varargs invoke(Varargs args) {
-            LOG.fine("connect");
-            connected = true;
+            LOG.fine("connect: not really processed");
             return LuaValue.NONE;
         }
     };
@@ -102,8 +100,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public VarArgFunction disconnect = new VarArgFunction() {
         public Varargs invoke(Varargs args) {
-            LOG.fine("disconnect");
-            connected = false;
+            LOG.fine("disconnect: not really processed");
             return LuaValue.NONE;
         }
     };
