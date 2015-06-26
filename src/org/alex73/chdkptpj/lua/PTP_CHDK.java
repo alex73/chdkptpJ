@@ -240,6 +240,35 @@ public class PTP_CHDK {
         return result;
     }
 
+    /**
+     * prp.c#2355 (svn rev. 667)
+     * 
+     * uint16_t ptp_chdk_get_live_data(PTPParams* params, unsigned flags,char **data,unsigned *data_size) {
+     */
+    public static byte[] ptp_chdk_get_live_data(Camera camera, int flags) throws Exception {
+        { // send get display data command
+            PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_GetDisplayData, flags);
+            camera.getConnection().sendPTPPacket(p);
+        }
+
+        byte[] data;
+        int size;
+        { // get response
+            PTPPacket rdata = camera.getConnection().getResponse();
+            checkResponsePacket(rdata, PTP.USB_CONTAINER_DATA, PTP.OPERATION_CHDK);
+
+            PTPPacket rinfo = camera.getConnection().getResponse();
+            checkResponsePacket(rinfo);
+
+            data = rdata.getData();
+            size = rinfo.getParam(0);
+            if (data.length != size) {
+                throw new Exception("Wrong data");
+            }
+            return data;
+        }
+    }
+
     static final String[] script_msg_types = { "none", "error", "return", "user" };
 
     /**
@@ -285,11 +314,11 @@ public class PTP_CHDK {
         return script_msg_error_type[type_id];
     }
 
-    public static void checkResponsePacket(PTPPacket p) throws Exception {
+    private static void checkResponsePacket(PTPPacket p) throws Exception {
         checkResponsePacket(p, PTP.USB_CONTAINER_RESPONSE, PTP.RESPONSE_CODE_OK);
     }
 
-    public static void checkResponsePacket(PTPPacket p, short requiredCommand, short requiredOppCode)
+    private static void checkResponsePacket(PTPPacket p, short requiredCommand, short requiredOppCode)
             throws Exception {
         if (p.getCommand() != requiredCommand) {
             throw new Exception("Wrong response packet(expected command is " + requiredCommand
