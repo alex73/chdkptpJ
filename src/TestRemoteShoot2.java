@@ -1,3 +1,8 @@
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+
 import org.alex73.chdkptpj.camera.Camera;
 import org.alex73.chdkptpj.camera.CameraFactory;
 import org.alex73.chdkptpj.lua.ChdkPtpJ;
@@ -16,19 +21,17 @@ public class TestRemoteShoot2 {
         camera.connect();
         camera.setRecordMode();
 
-        ChdkPtpJ fr = new ChdkPtpJ(camera, "lua");
+        ChdkPtpJ fr = new ChdkPtpJ(camera, "lua-orig");
 
-        // long tm = System.currentTimeMillis() / 10000;
-        // while (tm == System.currentTimeMillis() / 10000) {
-        // // wait for 10-seconds align time
-        // Thread.sleep(10);
-        // }
+        long tm = System.currentTimeMillis() / 10000;
+        while (tm == System.currentTimeMillis() / 10000) {
+            // wait for 10-seconds align time
+            Thread.sleep(10);
+        }
 
-        LuaTable p1 = new LuaTable();
-        fr.executeCliFunction("connect", p1);
-
+        // jpeg only - 2.8s, jpeg+raw - 3.8s, raw - 3.7s
         LuaTable p = new LuaTable();
-        p.set("img", LuaValue.valueOf(true));
+        p.set("jpg", LuaValue.valueOf(true));
         p.set("raw", LuaValue.valueOf(true));
         p.set(1, LuaValue.valueOf("/tmp/123/"));
         fr.executeCliFunction("remoteshoot", p);

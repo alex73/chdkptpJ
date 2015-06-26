@@ -28,3 +28,4 @@ dng=require'dng'
 dngcli=require'dngcli'
 
 con=chdku.connection()
+con.update_connection_info(con)
