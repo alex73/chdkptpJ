@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 
 import javax.usb.UsbDevice;
 
+import org.alex73.chdkptpj.lua.CHDKScreenImage;
 import org.alex73.chdkptpj.lua.LuaUtils;
 import org.alex73.chdkptpj.lua.PTP_CHDK;
 import org.alex73.chdkptpj.lua.PTP_CHDK.PairValues;

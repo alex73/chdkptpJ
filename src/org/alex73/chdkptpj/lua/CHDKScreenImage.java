@@ -1,15 +1,16 @@
-package org.alex73.chdkptpj.camera;
+package org.alex73.chdkptpj.lua;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.awt.image.WritableRaster;
 
 /**
- * Contains logic required to decode a raw CHDK viewport bytes {@link Packet}
- * into a readable {@link BufferedImage}
+ * Contains logic required to decode a raw CHDK viewport bytes {@link Packet} into a readable
+ * {@link BufferedImage}
  * 
  * @author <a href="mailto:alex.camilo@gmail.com">Alex Camilo</a>
  *
+ *         TODO : change to chdkptp implementation
  */
 public class CHDKScreenImage {
     public final static int Aspect_4_3 = 0;
