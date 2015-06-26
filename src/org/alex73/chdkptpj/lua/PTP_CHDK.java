@@ -285,11 +285,11 @@ public class PTP_CHDK {
         return script_msg_error_type[type_id];
     }
 
-    private static void checkResponsePacket(PTPPacket p) throws Exception {
+    public static void checkResponsePacket(PTPPacket p) throws Exception {
         checkResponsePacket(p, PTP.USB_CONTAINER_RESPONSE, PTP.RESPONSE_CODE_OK);
     }
 
-    private static void checkResponsePacket(PTPPacket p, short requiredCommand, short requiredOppCode)
+    public static void checkResponsePacket(PTPPacket p, short requiredCommand, short requiredOppCode)
             throws Exception {
         if (p.getCommand() != requiredCommand) {
             throw new Exception("Wrong response packet(expected command is " + requiredCommand

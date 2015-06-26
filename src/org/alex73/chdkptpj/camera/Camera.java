@@ -20,6 +20,7 @@
  **************************************************************************/
 package org.alex73.chdkptpj.camera;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -116,6 +117,20 @@ public class Camera {
         while (!isInRecordMode()) {
             Thread.sleep(10);
         }
+    }
+
+    public BufferedImage getPreview() throws Exception {
+        PTPPacket p1 = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_GetDisplayData, PTP.LV_TFR_VIEWPORT);
+        connection.sendPTPPacket(p1);
+
+        // get response
+        PTPPacket r1 = connection.getResponse();
+        PTP_CHDK.checkResponsePacket(r1, PTP.USB_CONTAINER_DATA, PTP.OPERATION_CHDK);
+        PTPPacket r2 = connection.getResponse();
+        PTP_CHDK.checkResponsePacket(r2);
+
+        byte[] previewBytes = r1.getData();
+        return new CHDKScreenImage(previewBytes).decodeViewport();
     }
 
     /**

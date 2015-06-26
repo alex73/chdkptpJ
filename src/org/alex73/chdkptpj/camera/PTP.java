@@ -53,4 +53,8 @@ public class PTP {
 
     public static final short RESPONSE_CODE_OK = (short) 0x2001;
     public static final short RESPONSE_CODE_GeneralError = (short) 0x2002;
+
+    public static final int LV_TFR_VIEWPORT = 0x01;
+    public static final int LV_TFR_BITMAP = 0x04;
+    public static final int LV_TFR_PALETTE = 0x08;
 }
