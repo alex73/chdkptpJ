@@ -1,4 +1,4 @@
-package org.alex73.chdkptpj.lua;
+package org.alex73.chdkptpj.camera.lowlevel;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;

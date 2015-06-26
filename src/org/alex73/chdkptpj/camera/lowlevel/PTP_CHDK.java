@@ -18,7 +18,7 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  **************************************************************************/
-package org.alex73.chdkptpj.lua;
+package org.alex73.chdkptpj.camera.lowlevel;
 
 import org.alex73.chdkptpj.camera.Camera;
 import org.alex73.chdkptpj.camera.PTP;
@@ -36,7 +36,7 @@ public class PTP_CHDK {
      * 
      * the following happens to match what is used in CHDK, but is not part of the protocol
      */
-    public static class ptp_chdk_script_msg {
+    public static class script_msg {
         public int size;
         public int script_id; // id of script message is to/from
         public int type;
@@ -49,7 +49,7 @@ public class PTP_CHDK {
      * 
      * chunk for remote capture
      */
-    public static class ptp_chdk_rc_chunk {
+    public static class rc_chunk {
         public int size; // length of data
         public boolean last; // is it the last chunk?
         public int offset; // offset within file, or -1
@@ -86,14 +86,14 @@ public class PTP_CHDK {
     /**
      * ptp.h#188 (svn rev. 667)
      */
-    enum ptp_chdk_script_msg_status {
+    enum script_msg_status {
         PTP_CHDK_S_MSGSTATUS_OK(0), // queued ok
         PTP_CHDK_S_MSGSTATUS_NOTRUN(1), // no script is running
         PTP_CHDK_S_MSGSTATUS_QFULL(2), // queue is full
         PTP_CHDK_S_MSGSTATUS_BADID(3); // specified ID is not running
         public final int id;
 
-        private ptp_chdk_script_msg_status(int id) {
+        private script_msg_status(int id) {
             this.id = id;
         }
     }
@@ -113,7 +113,7 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_get_script_status(PTPParams* params, unsigned *status)
      */
-    public static byte ptp_chdk_get_script_status(Camera camera) throws Exception {
+    public static byte get_script_status(Camera camera) throws Exception {
         // send script status command
         PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_ScriptStatus);
         camera.getConnection().sendPTPPacket(p);
@@ -130,7 +130,7 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_exec_lua(PTPParams* params, char *script, int flags, int *script_id, int *status)
      */
-    public static PairValues ptp_chdk_exec_lua(Camera camera, String script, int flags) throws Exception {
+    public static PairValues exec_lua(Camera camera, String script, int flags) throws Exception {
         // send script command
         PTPPacket p1 = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_ExecuteScript, PTP_CHDK_SL_LUA | flags);
         camera.getConnection().sendPTPPacket(p1);
@@ -157,7 +157,7 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_get_version(PTPParams* params, int *major, int *minor)
      */
-    public static PairValues ptp_chdk_get_version(Camera camera) throws Exception {
+    public static PairValues get_version(Camera camera) throws Exception {
         // send version command
         PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_Version);
         camera.getConnection().sendPTPPacket(p);
@@ -174,7 +174,7 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_read_script_msg(PTPParams* params, ptp_chdk_script_msg **msg)
      */
-    public static ptp_chdk_script_msg ptp_chdk_read_script_msg(Camera camera) throws Exception {
+    public static script_msg read_script_msg(Camera camera) throws Exception {
         // send read script message command
         PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_ReadScriptMsg);
         camera.getConnection().sendPTPPacket(p);
@@ -185,7 +185,7 @@ public class PTP_CHDK {
         PTPPacket r2 = camera.getConnection().getResponse();
         checkResponsePacket(r2);
 
-        ptp_chdk_script_msg result = new ptp_chdk_script_msg();
+        script_msg result = new script_msg();
         result.type = r2.getParam(0);
         result.subtype = r2.getParam(1);
         result.script_id = r2.getParam(2);
@@ -201,7 +201,7 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_rcisready(PTPParams* params, int *isready,int *imgnum)
      */
-    public static PairValues ptp_chdk_rcisready(Camera camera) throws Exception {
+    public static PairValues rcisready(Camera camera) throws Exception {
         // send check ready command
         PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_RemoteCaptureIsReady);
         camera.getConnection().sendPTPPacket(p);
@@ -218,13 +218,13 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_rcgetchunk(PTPParams* params, int fmt, ptp_chdk_rc_chunk *chunk)
      */
-    public static ptp_chdk_rc_chunk ptp_chdk_rcgetchunk(Camera camera, int fmt) throws Exception {
+    public static rc_chunk rcgetchunk(Camera camera, int fmt) throws Exception {
         { // send get chunk command
             PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_RemoteCaptureGetData, fmt);
             camera.getConnection().sendPTPPacket(p);
         }
 
-        ptp_chdk_rc_chunk result = new ptp_chdk_rc_chunk();
+        rc_chunk result = new rc_chunk();
         { // get response
             PTPPacket rdata = camera.getConnection().getResponse();
             checkResponsePacket(rdata, PTP.USB_CONTAINER_DATA, PTP.OPERATION_CHDK);
@@ -245,7 +245,7 @@ public class PTP_CHDK {
      * 
      * uint16_t ptp_chdk_get_live_data(PTPParams* params, unsigned flags,char **data,unsigned *data_size) {
      */
-    public static byte[] ptp_chdk_get_live_data(Camera camera, int flags) throws Exception {
+    public static byte[] get_live_data(Camera camera, int flags) throws Exception {
         { // send get display data command
             PTPPacket p = new PTPPacket(PTP.OPERATION_CHDK, PTP.CHDK_GetDisplayData, flags);
             camera.getConnection().sendPTPPacket(p);

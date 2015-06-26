@@ -24,6 +24,7 @@ import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -46,7 +47,7 @@ public class LuaUtils {
         return result.toString();
     }
 
-    public static Object deserializeLuaObject(PTP_CHDK.ptp_chdk_script_msg msg) throws Exception {
+    public static Object deserializeLuaObject(PTP_CHDK.script_msg msg) throws Exception {
         switch (msg.subtype) {
         case PTP_CHDK.PTP_CHDK_TYPE_UNSUPPORTED:
         case PTP_CHDK.PTP_CHDK_TYPE_STRING:

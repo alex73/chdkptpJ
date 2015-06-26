@@ -28,10 +28,10 @@ import java.util.logging.Logger;
 
 import javax.usb.UsbDevice;
 
-import org.alex73.chdkptpj.lua.CHDKScreenImage;
+import org.alex73.chdkptpj.camera.lowlevel.CHDKScreenImage;
+import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
+import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK.PairValues;
 import org.alex73.chdkptpj.lua.LuaUtils;
-import org.alex73.chdkptpj.lua.PTP_CHDK;
-import org.alex73.chdkptpj.lua.PTP_CHDK.PairValues;
 
 /**
  * Camera object. This is main object for make all operations with camera.
@@ -121,7 +121,7 @@ public class Camera {
     }
 
     public BufferedImage getPreview() throws Exception {
-        byte[] previewBytes = PTP_CHDK.ptp_chdk_get_live_data(this, PTP.LV_TFR_VIEWPORT);
+        byte[] previewBytes = PTP_CHDK.get_live_data(this, PTP.LV_TFR_VIEWPORT);
         return new CHDKScreenImage(previewBytes).decodeViewport();
     }
 
@@ -129,7 +129,7 @@ public class Camera {
      * Run Lua command on camera and don't wait for finish.
      */
     public int runLua(String command) throws Exception {
-        PairValues result = PTP_CHDK.ptp_chdk_exec_lua(this, command, 0);
+        PairValues result = PTP_CHDK.exec_lua(this, command, 0);
         return result.v1;
     }
 
@@ -140,7 +140,7 @@ public class Camera {
         int scriptId = runLua(command);
 
         while (true) {
-            byte status = PTP_CHDK.ptp_chdk_get_script_status(this);
+            byte status = PTP_CHDK.get_script_status(this);
             if (status != 1) {
                 break;
             }
@@ -150,7 +150,7 @@ public class Camera {
 
         List<Object> result = new ArrayList<>();
         while (true) {
-            PTP_CHDK.ptp_chdk_script_msg msg = PTP_CHDK.ptp_chdk_read_script_msg(this);
+            PTP_CHDK.script_msg msg = PTP_CHDK.read_script_msg(this);
             if (msg.script_id == 0) {
                 break;
             }

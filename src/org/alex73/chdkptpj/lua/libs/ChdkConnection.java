@@ -28,9 +28,9 @@ import javax.usb.UsbDeviceDescriptor;
 import javax.usb.util.UsbUtil;
 
 import org.alex73.chdkptpj.camera.Camera;
+import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
+import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK.PairValues;
 import org.alex73.chdkptpj.lua.LuaUtils;
-import org.alex73.chdkptpj.lua.PTP_CHDK;
-import org.alex73.chdkptpj.lua.PTP_CHDK.PairValues;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -215,7 +215,7 @@ public class ChdkConnection extends ALuaBaseLib {
             LOG.fine(">> camera_api_version_pcall");
 
             try {
-                PairValues version = PTP_CHDK.ptp_chdk_get_version(camera);
+                PairValues version = PTP_CHDK.get_version(camera);
                 // TODO I don't understand why is 3 parameters need instead 2
                 Varargs result = LuaValue.varargsOf(LuaValue.TRUE, LuaValue.valueOf(version.v1),
                         LuaValue.valueOf(version.v2));
@@ -243,7 +243,7 @@ public class ChdkConnection extends ALuaBaseLib {
             LOG.fine(">> script_status");
 
             try {
-                byte status = PTP_CHDK.ptp_chdk_get_script_status(camera);
+                byte status = PTP_CHDK.get_script_status(camera);
                 LuaTable table = new LuaTable();
                 table.set("run", LuaValue.valueOf((status & PTP_CHDK_SCRIPT_STATUS_RUN) != 0));
                 table.set("msg", LuaValue.valueOf((status & PTP_CHDK_SCRIPT_STATUS_MSG) != 0));
@@ -285,7 +285,7 @@ public class ChdkConnection extends ALuaBaseLib {
 
             PairValues scriptDesc;
             try {
-                scriptDesc = PTP_CHDK.ptp_chdk_exec_lua(camera, code.tojstring(), flags.toint());
+                scriptDesc = PTP_CHDK.exec_lua(camera, code.tojstring(), flags.toint());
             } catch (Exception ex) {
                 LOG.log(Level.WARNING, ">> execlua: ",ex);
                 throw new RuntimeException(ex);
@@ -333,7 +333,7 @@ public class ChdkConnection extends ALuaBaseLib {
             LOG.fine(">> read_msg");
 
             try {
-                PTP_CHDK.ptp_chdk_script_msg msg = PTP_CHDK.ptp_chdk_read_script_msg(camera);
+                PTP_CHDK.script_msg msg = PTP_CHDK.read_script_msg(camera);
 
                 LuaTable table = new LuaTable();
                 table.set("script_id", msg.script_id);
@@ -407,7 +407,7 @@ public class ChdkConnection extends ALuaBaseLib {
         public Varargs invoke(Varargs varargs) {
             LOG.fine(">> capture_ready");
             try {
-                PairValues isready = PTP_CHDK.ptp_chdk_rcisready(camera);
+                PairValues isready = PTP_CHDK.rcisready(camera);
 
                 Varargs result = LuaValue.varargsOf(LuaValue.valueOf(isready.v1),
                         LuaValue.valueOf(isready.v2));
@@ -453,7 +453,7 @@ public class ChdkConnection extends ALuaBaseLib {
                 timeStart = System.currentTimeMillis();
             }
             try {
-                PTP_CHDK.ptp_chdk_rc_chunk chunk = PTP_CHDK.ptp_chdk_rcgetchunk(camera, fmt.toint());
+                PTP_CHDK.rc_chunk chunk = PTP_CHDK.rcgetchunk(camera, fmt.toint());
 
                 LuaTable result = new LuaTable();
                 result.set("size", chunk.size);
