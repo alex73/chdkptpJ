@@ -21,6 +21,7 @@
 package org.alex73.chdkptpj.lua.libs;
 
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
@@ -39,7 +40,6 @@ import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
 import org.usb4java.javax.UsbHacks;
 
-import com.sun.istack.internal.logging.Logger;
 
 public class ChdkConnection extends ALuaBaseLib {
     public static final int PTP_CHDK_SCRIPT_STATUS_RUN = 1;
@@ -51,7 +51,7 @@ public class ChdkConnection extends ALuaBaseLib {
     // the following are for ExecuteScript status only, not message types
     public static final int PTP_CHDK_S_ERR_SCRIPTRUNNING = 0x1000; // script already running with NOKILL
 
-    private static Logger LOG = Logger.getLogger(ChdkConnection.class);
+    private static Logger LOG = Logger.getLogger(ChdkConnection.class.getName());
 
     private Camera camera;
     private long write_count, read_count;
@@ -224,7 +224,7 @@ public class ChdkConnection extends ALuaBaseLib {
                 }
                 return result;
             } catch (Exception ex) {
-                LOG.warning("Error in camera_api_version_pcall", ex);
+                LOG.log(Level.WARNING, "Error in camera_api_version_pcall", ex);
                 throw new RuntimeException(ex);
             }
         };
@@ -275,23 +275,34 @@ public class ChdkConnection extends ALuaBaseLib {
     public ThreeArgFunction execlua = new ThreeArgFunction() {
         @Override
         public LuaValue call(LuaValue table, LuaValue code, LuaValue flags) {
-            LOG.fine("execlua");
+            if (LOG.isLoggable(Level.FINE)) {
+                String sc = code.tojstring();
+                if (sc.length() > 60) {
+                    sc = sc.substring(0, 40);
+                }
+                LOG.fine(">> execlua: " + sc.replace("\n", "\\n").replace("\r", "\\r"));
+            }
 
             PairValues scriptDesc;
             try {
                 scriptDesc = PTP_CHDK.ptp_chdk_exec_lua(camera, code.tojstring(), flags.toint());
             } catch (Exception ex) {
+                LOG.log(Level.WARNING, ">> execlua: ",ex);
                 throw new RuntimeException(ex);
             }
             switch (scriptDesc.v2) {
             case PTP_CHDK_S_ERRTYPE_NONE:
                 currentScriptId = scriptDesc.v1;
+                LOG.fine(">> execlua: OK");
                 return LuaValue.NONE;
             case PTP_CHDK_S_ERRTYPE_COMPILE:
+                LOG.warning(">> execlua: script compile error");
                 throw new RuntimeException("script compile error");
             case PTP_CHDK_S_ERR_SCRIPTRUNNING:
+                LOG.warning(">> execlua: a script is already running");
                 throw new RuntimeException("a script is already running");
             default:
+                LOG.warning(">> execlua: unknown error");
                 throw new RuntimeException("unknown error");
             }
         }
@@ -349,7 +360,7 @@ public class ChdkConnection extends ALuaBaseLib {
                 }
                 return table;
             } catch (Exception ex) {
-                LOG.warning("read_msg error", ex);
+                LOG.log(Level.WARNING, "read_msg error", ex);
                 throw new RuntimeException(ex);
             }
         }
@@ -405,7 +416,7 @@ public class ChdkConnection extends ALuaBaseLib {
                 }
                 return result;
             } catch (Exception ex) {
-                LOG.warning("capture_ready error", ex);
+                LOG.log(Level.WARNING, "capture_ready error", ex);
                 throw new RuntimeException(ex);
             }
         }
@@ -454,13 +465,13 @@ public class ChdkConnection extends ALuaBaseLib {
 
                 if (LOG.isLoggable(Level.FINE)) {
                     long timeEnd = System.currentTimeMillis();
-                    LOG.fine("<< capture_get_chunk_pcall: " + LuaUtils.dumpTable(result) + " ("
-                            + (timeEnd - timeStart) + " ms)");
+                    LOG.fine("<< capture_get_chunk_pcall: " + LuaUtils.dumpTable(result) + " (" + chunk.size
+                            + "b in " + (timeEnd - timeStart) + " ms)");
                 }
 
                 return LuaValue.varargsOf(LuaValue.TRUE, result);
             } catch (Exception ex) {
-                LOG.warning("capture_get_chunk_pcall error", ex);
+                LOG.log(Level.WARNING, "capture_get_chunk_pcall error", ex);
                 throw new RuntimeException(ex);
             }
         }

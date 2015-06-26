@@ -78,7 +78,8 @@ public class SysLib extends ALuaBaseLib {
         @Override
         public LuaValue call(LuaValue arg1, LuaValue arg2) {
             if (arg2 instanceof LuaTable) {
-                System.out.println(arg1.toString() + LuaUtils.dumpTable((LuaTable) arg2));
+                System.out.println(arg1.toString() + arg2.toString() + "/"
+                        + LuaUtils.dumpTable((LuaTable) arg2));
             } else {
                 System.out.println(arg1.toString() + arg2.toString());
             }
