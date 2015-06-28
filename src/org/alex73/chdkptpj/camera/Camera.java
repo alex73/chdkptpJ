@@ -23,8 +23,6 @@ package org.alex73.chdkptpj.camera;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.usb.UsbDevice;
 
@@ -32,12 +30,14 @@ import org.alex73.chdkptpj.camera.lowlevel.CHDKScreenImage;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK.PairValues;
 import org.alex73.chdkptpj.lua.LuaUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Camera object. This is main object for make all operations with camera.
  */
 public class Camera {
-    private static Logger LOG = Logger.getLogger(Camera.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(Camera.class);
 
     /**
      * Buffer MUST BE bigger than greatest possible receive transfer. Otherwise, end of transfer will not be
@@ -90,7 +90,7 @@ public class Camera {
             connection.close();
             connection = null;
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, "Close camera connection error", ex);
+            LOG.error("Close camera connection error", ex);
             throw ex;
         }
         LOG.info("Camera disconnected");
@@ -155,7 +155,7 @@ public class Camera {
                 break;
             }
             if (msg.script_id != scriptId) {
-                LOG.severe("Response from other script. Expected " + scriptId + " but received "
+                LOG.error("Response from other script. Expected " + scriptId + " but received "
                         + msg.script_id + ". Possible thread-safe issue");
                 throw new Exception("Response from other script. Expected " + scriptId + " but received "
                         + msg.script_id + ". Possible thread-safe issue");

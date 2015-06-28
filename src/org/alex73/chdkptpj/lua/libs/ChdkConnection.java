@@ -20,8 +20,7 @@
  **************************************************************************/
 package org.alex73.chdkptpj.lua.libs;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
@@ -38,6 +37,8 @@ import org.luaj.vm2.lib.LibFunction;
 import org.luaj.vm2.lib.ThreeArgFunction;
 import org.luaj.vm2.lib.VarArgFunction;
 import org.luaj.vm2.lib.ZeroArgFunction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.usb4java.javax.UsbHacks;
 
 
@@ -51,7 +52,7 @@ public class ChdkConnection extends ALuaBaseLib {
     // the following are for ExecuteScript status only, not message types
     public static final int PTP_CHDK_S_ERR_SCRIPTRUNNING = 0x1000; // script already running with NOKILL
 
-    private static Logger LOG = Logger.getLogger(ChdkConnection.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(ChdkConnection.class);
 
     private Camera camera;
     private long write_count, read_count;
@@ -69,7 +70,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public ZeroArgFunction is_connected = new ZeroArgFunction() {
         public LuaValue call() {
-            LOG.fine("is_connected: " + camera.isConnected());
+            LOG.trace("is_connected: " + camera.isConnected());
             return LuaValue.valueOf(camera.isConnected());
         }
     };
@@ -83,7 +84,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public VarArgFunction connect = new VarArgFunction() {
         public Varargs invoke(Varargs args) {
-            LOG.fine("connect: not really processed");
+            LOG.debug("connect: not really processed");
             return LuaValue.NONE;
         }
     };
@@ -100,7 +101,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public VarArgFunction disconnect = new VarArgFunction() {
         public Varargs invoke(Varargs args) {
-            LOG.fine("disconnect: not really processed");
+            LOG.debug("disconnect: not really processed");
             return LuaValue.NONE;
         }
     };
@@ -112,7 +113,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public ZeroArgFunction reset_counters = new ZeroArgFunction() {
         public LuaValue call() {
-            LOG.fine("reset_counters");
+            LOG.trace("reset_counters");
             write_count = 0;
             read_count = 0;
             return LuaValue.NONE;
@@ -143,7 +144,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public ZeroArgFunction get_con_devinfo = new ZeroArgFunction() {
         public LuaValue call() {
-            LOG.fine(">> get_con_devinfo");
+            LOG.trace(">> get_con_devinfo");
 
             UsbHacks.UsbDeviceId id = UsbHacks.getDeviceId(camera.getDevice());
             UsbDeviceDescriptor desc = camera.getDevice().getUsbDeviceDescriptor();
@@ -155,8 +156,8 @@ public class ChdkConnection extends ALuaBaseLib {
             table.set("vendor_id", hex4(desc.idVendor()));
             table.set("product_id", hex4(desc.idProduct()));
 
-            if (LOG.isLoggable(Level.FINE)) {
-                LOG.fine("<< get_con_devinfo: " + LuaUtils.dumpTable(table));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("<< get_con_devinfo: " + LuaUtils.dumpTable(table));
             }
             return table;
         }
@@ -182,7 +183,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public ZeroArgFunction get_ptp_devinfo = new ZeroArgFunction() {
         public LuaValue call() {
-            LOG.fine("get_ptp_devinfo");
+            LOG.trace("get_ptp_devinfo");
 
             LuaTable table = new LuaTable();
             try {
@@ -212,19 +213,19 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public LibFunction camera_api_version_pcall = new LibFunction() {
         public Varargs invoke(Varargs varargs) {
-            LOG.fine(">> camera_api_version_pcall");
+            LOG.trace(">> camera_api_version_pcall");
 
             try {
                 PairValues version = PTP_CHDK.get_version(camera);
                 // TODO I don't understand why is 3 parameters need instead 2
                 Varargs result = LuaValue.varargsOf(LuaValue.TRUE, LuaValue.valueOf(version.v1),
                         LuaValue.valueOf(version.v2));
-                if (LOG.isLoggable(Level.FINE)) {
-                    LOG.fine("<< camera_api_version_pcall: " + result);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("<< camera_api_version_pcall: " + result);
                 }
                 return result;
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "Error in camera_api_version_pcall", ex);
+                LOG.warn("Error in camera_api_version_pcall", ex);
                 throw new RuntimeException(ex);
             }
         };
@@ -240,7 +241,7 @@ public class ChdkConnection extends ALuaBaseLib {
      */
     public ZeroArgFunction script_status = new ZeroArgFunction() {
         public LuaValue call() {
-            LOG.fine(">> script_status");
+            LOG.trace(">> script_status");
 
             try {
                 byte status = PTP_CHDK.get_script_status(camera);
@@ -248,8 +249,8 @@ public class ChdkConnection extends ALuaBaseLib {
                 table.set("run", LuaValue.valueOf((status & PTP_CHDK_SCRIPT_STATUS_RUN) != 0));
                 table.set("msg", LuaValue.valueOf((status & PTP_CHDK_SCRIPT_STATUS_MSG) != 0));
 
-                if (LOG.isLoggable(Level.FINE)) {
-                    LOG.fine("<< script_status: " + LuaUtils.dumpTable(table));
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("<< script_status: " + LuaUtils.dumpTable(table));
                 }
                 return table;
             } catch (Exception ex) {
@@ -275,34 +276,34 @@ public class ChdkConnection extends ALuaBaseLib {
     public ThreeArgFunction execlua = new ThreeArgFunction() {
         @Override
         public LuaValue call(LuaValue table, LuaValue code, LuaValue flags) {
-            if (LOG.isLoggable(Level.FINE)) {
+            if (LOG.isTraceEnabled()) {
                 String sc = code.tojstring();
                 if (sc.length() > 60) {
                     sc = sc.substring(0, 40);
                 }
-                LOG.fine(">> execlua: " + sc.replace("\n", "\\n").replace("\r", "\\r"));
+                LOG.trace(">> execlua: " + sc.replace("\n", "\\n").replace("\r", "\\r"));
             }
 
             PairValues scriptDesc;
             try {
                 scriptDesc = PTP_CHDK.exec_lua(camera, code.tojstring(), flags.toint());
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, ">> execlua: ",ex);
+                LOG.warn(">> execlua: ",ex);
                 throw new RuntimeException(ex);
             }
             switch (scriptDesc.v2) {
             case PTP_CHDK_S_ERRTYPE_NONE:
                 currentScriptId = scriptDesc.v1;
-                LOG.fine(">> execlua: OK");
+                LOG.trace(">> execlua: OK");
                 return LuaValue.NONE;
             case PTP_CHDK_S_ERRTYPE_COMPILE:
-                LOG.warning(">> execlua: script compile error");
+                LOG.warn(">> execlua: script compile error");
                 throw new RuntimeException("script compile error");
             case PTP_CHDK_S_ERR_SCRIPTRUNNING:
-                LOG.warning(">> execlua: a script is already running");
+                LOG.warn(">> execlua: a script is already running");
                 throw new RuntimeException("a script is already running");
             default:
-                LOG.warning(">> execlua: unknown error");
+                LOG.warn(">> execlua: unknown error");
                 throw new RuntimeException("unknown error");
             }
         }
@@ -330,7 +331,7 @@ public class ChdkConnection extends ALuaBaseLib {
     public ThreeArgFunction read_msg = new ThreeArgFunction() {
         @Override
         public LuaValue call(LuaValue unknown, LuaValue code, LuaValue flags) {
-            LOG.fine(">> read_msg");
+            LOG.trace(">> read_msg");
 
             try {
                 PTP_CHDK.script_msg msg = PTP_CHDK.read_script_msg(camera);
@@ -355,12 +356,12 @@ public class ChdkConnection extends ALuaBaseLib {
                     break;
                 }
 
-                if (LOG.isLoggable(Level.FINE)) {
-                    LOG.fine("<< read_msg: " + LuaUtils.dumpTable(table));
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("<< read_msg: " + LuaUtils.dumpTable(table));
                 }
                 return table;
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "read_msg error", ex);
+                LOG.warn("read_msg error", ex);
                 throw new RuntimeException(ex);
             }
         }
@@ -382,7 +383,7 @@ public class ChdkConnection extends ALuaBaseLib {
     public ZeroArgFunction get_script_id = new ZeroArgFunction() {
         @Override
         public LuaValue call() {
-            LOG.fine("get_script_id: " + currentScriptId);
+            LOG.trace("get_script_id: " + currentScriptId);
             return currentScriptId != null ? LuaValue.valueOf(currentScriptId.intValue()) : LuaValue.FALSE;
         }
     };
@@ -405,18 +406,18 @@ public class ChdkConnection extends ALuaBaseLib {
     public LibFunction capture_ready = new LibFunction() {
         @Override
         public Varargs invoke(Varargs varargs) {
-            LOG.fine(">> capture_ready");
+            LOG.trace(">> capture_ready");
             try {
                 PairValues isready = PTP_CHDK.rcisready(camera);
 
                 Varargs result = LuaValue.varargsOf(LuaValue.valueOf(isready.v1),
                         LuaValue.valueOf(isready.v2));
-                if (LOG.isLoggable(Level.FINE)) {
-                    LOG.fine("<< capture_ready: " + result);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("<< capture_ready: " + result);
                 }
                 return result;
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "capture_ready error", ex);
+                LOG.warn("capture_ready error", ex);
                 throw new RuntimeException(ex);
             }
         }
@@ -448,8 +449,8 @@ public class ChdkConnection extends ALuaBaseLib {
             LuaValue fmt = args.arg(2);
 
             long timeStart = 0;
-            if (LOG.isLoggable(Level.FINE)) {
-                LOG.fine(">> capture_get_chunk_pcall " + fmt);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(">> capture_get_chunk_pcall " + fmt);
                 timeStart = System.currentTimeMillis();
             }
             try {
@@ -463,15 +464,15 @@ public class ChdkConnection extends ALuaBaseLib {
                 result.set("last", LuaValue.valueOf(chunk.last));
                 result.set("data", new Lbuf.LbufValue(chunk.data));
 
-                if (LOG.isLoggable(Level.FINE)) {
+                if (LOG.isTraceEnabled()) {
                     long timeEnd = System.currentTimeMillis();
-                    LOG.fine("<< capture_get_chunk_pcall: " + LuaUtils.dumpTable(result) + " (" + chunk.size
+                    LOG.trace("<< capture_get_chunk_pcall: " + LuaUtils.dumpTable(result) + " (" + chunk.size
                             + "b in " + (timeEnd - timeStart) + " ms)");
                 }
 
                 return LuaValue.varargsOf(LuaValue.TRUE, result);
             } catch (Exception ex) {
-                LOG.log(Level.WARNING, "capture_get_chunk_pcall error", ex);
+                LOG.warn("capture_get_chunk_pcall error", ex);
                 throw new RuntimeException(ex);
             }
         }

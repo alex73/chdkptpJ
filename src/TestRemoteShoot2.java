@@ -6,12 +6,14 @@ import javax.imageio.ImageIO;
 import org.alex73.chdkptpj.camera.Camera;
 import org.alex73.chdkptpj.camera.CameraFactory;
 import org.alex73.chdkptpj.lua.ChdkPtpJ;
+import org.apache.log4j.PropertyConfigurator;
 import org.luaj.vm2.LuaTable;
 import org.luaj.vm2.LuaValue;
 
 public class TestRemoteShoot2 {
 
     public static void main(String[] args) throws Exception {
+        PropertyConfigurator.configure("log4j.properties");
         Camera camera = null;
         for (Camera c : CameraFactory.findCameras()) {
             camera = c;

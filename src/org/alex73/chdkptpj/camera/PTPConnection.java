@@ -22,7 +22,6 @@ package org.alex73.chdkptpj.camera;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Logger;
 
 import javax.usb.UsbConst;
 import javax.usb.UsbDevice;
@@ -31,13 +30,15 @@ import javax.usb.UsbInterface;
 import javax.usb.UsbIrp;
 import javax.usb.UsbPipe;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.usb4java.javax.UsbHacks;
 
 /**
  * PTP connection.
  */
 public class PTPConnection {
-    private static Logger LOG = Logger.getLogger(PTPConnection.class.getName());
+    private static Logger LOG = LoggerFactory.getLogger(PTPConnection.class);
 
     public static final int RESPONSE_TIMEOUT = 10000;
 
@@ -76,11 +77,11 @@ public class PTPConnection {
             }
         }
         if (endpointInBulk == null) {
-            LOG.severe("There is no In Bulk endpoint");
+            LOG.error("There is no In Bulk endpoint");
             throw new Exception("There is no In Bulk endpoint");
         }
         if (endpointOutBulk == null) {
-            LOG.severe("There is no Out Bulk endpoint");
+            LOG.error("There is no Out Bulk endpoint");
             throw new Exception("There is no Out Bulk endpoint");
         }
 
@@ -111,7 +112,7 @@ public class PTPConnection {
 
         PTPPacket r = this.getResponse();
         if (r.getCommand() != PTP.USB_CONTAINER_RESPONSE || r.getOperationCode() != PTP.RESPONSE_CODE_OK) {
-            LOG.severe("Camera returns error on the OpenSession request");
+            LOG.error("Camera returns error on the OpenSession request");
             throw new Exception("Camera returns error on the OpenSession request");
         }
     }
