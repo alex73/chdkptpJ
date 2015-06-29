@@ -53,7 +53,7 @@ public class CameraFactory {
     /**
      * Find all known attached cameras.
      */
-    public static Collection<Camera> findCameras() throws Exception {
+    public static List<Camera> findCameras() throws Exception {
         List<Camera> result = new ArrayList<>();
         for (UsbDevice device : listAllUsbDevices()) {
             UsbDeviceDescriptor desc = device.getUsbDeviceDescriptor();

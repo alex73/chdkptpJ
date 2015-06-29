@@ -30,6 +30,7 @@ import org.alex73.chdkptpj.camera.lowlevel.CHDKScreenImage;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK.PairValues;
 import org.alex73.chdkptpj.lua.LuaUtils;
+import org.alex73.chdkptpj.lua.ScriptError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,10 @@ public class Camera {
 
     private final UsbDevice device;
     private PTPConnection connection;
+    private CHDKScripting scripting;
+
+    private int captureSupportedFormats = -1;
+    private int propset = -1;
 
     public Camera(UsbDevice device) {
         this.device = device;
@@ -64,6 +69,10 @@ public class Camera {
         return connection;
     }
 
+    public CHDKScripting getScripting() {
+        return scripting;
+    }
+
     public boolean isConnected() {
         return connection != null;
     }
@@ -75,10 +84,28 @@ public class Camera {
         LOG.info("Connecting to device " + device.getManufacturerString() + " : " + device.getProductString()
                 + " : " + device.getSerialNumberString());
         connection = new PTPConnection(device, RECEIVE_BUFFER_SIZE);
+        scripting = new CHDKScripting(this);
         LOG.info("Camera connected successfully");
 
-        // retrieve some camera data
-        // requestUsbCaptureSupportedFormats();
+        // retrieve camera info
+
+        try {
+            if ("function".equals(executeLua("return type(init_usb_capture)"))) {
+                captureSupportedFormats = (int) executeLua("return get_usb_capture_support()");
+            } else {
+                captureSupportedFormats = 0;
+            }
+        } catch (Exception ex) {
+            LOG.warn("Error retrieve captureSupportedFormats", ex);
+            throw ex;
+        }
+
+        try {
+            propset = scripting.get_propset();
+        } catch (Exception ex) {
+            LOG.warn("Error retrieve propset", ex);
+            throw ex;
+        }
     }
 
     /**
@@ -100,8 +127,7 @@ public class Camera {
      * http://chdk.wikia.com/wiki/Lua/Lua_Reference#get_mode
      */
     public boolean isInRecordMode() throws Exception {
-        List<Object> r = (List<Object>) executeLua("return get_mode();");
-        return (boolean) r.get(0);
+        return (boolean) executeLuaMultiresult("return get_mode();").get(0);
     }
 
     /**
@@ -129,6 +155,13 @@ public class Camera {
      * Run Lua command on camera and don't wait for finish.
      */
     public int runLua(String command) throws Exception {
+        if (LOG.isTraceEnabled()) {
+            String sc = command;
+            if (sc.length() > 60) {
+                sc = sc.substring(0, 40);
+            }
+            LOG.trace(">> runLua: " + sc.replace("\n", "\\n").replace("\r", "\\r"));
+        }
         PairValues result = PTP_CHDK.exec_lua(this, command, 0);
         return result.v1;
     }
@@ -136,7 +169,7 @@ public class Camera {
     /**
      * Execute Lua command on camera and wait for result.
      */
-    public List<Object> executeLua(String command) throws Exception {
+    public List<Object> executeLuaMultiresult(String command) throws Exception {
         int scriptId = runLua(command);
 
         while (true) {
@@ -168,7 +201,7 @@ public class Camera {
                 obj = LuaUtils.deserializeLuaObject(msg);
                 break;
             default:
-                obj = new Exception("ERROR: " + PTP_CHDK.script_msg_error_type_to_name(msg.subtype) + " "
+                obj = new ScriptError("ERROR: " + PTP_CHDK.script_msg_error_type_to_name(msg.subtype) + " "
                         + new String(msg.data, "UTF-8"));
                 break;
             }
@@ -178,11 +211,26 @@ public class Camera {
         return result;
     }
 
-    // private void requestUsbCaptureSupportedFormats() throws Exception {
-    // if ("function".equals(executeLuaQuery("return type(init_usb_capture)"))) {
-    // captureSupportedFormats = (int) executeLuaQuery("return get_usb_capture_support()");
-    // } else {
-    // captureSupportedFormats = 0;
-    // }
-    // }
+    public Object executeLua(String command) throws Exception {
+        List<Object> r = executeLuaMultiresult(command);
+        if (r.isEmpty()) {
+            return Void.TYPE;
+        }
+        if (r.size() > 1) {
+            throw new Exception("Too many results from Lua: " + r);
+        }
+        if (r.get(0) instanceof ScriptError) {
+            throw (ScriptError) r.get(0);
+        } else {
+            return r.get(0);
+        }
+    }
+
+    public int getPropset() {
+        return propset;
+    }
+
+    public int getCaptureSupportedFormats() {
+        return captureSupportedFormats;
+    }
 }
