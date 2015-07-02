@@ -1,0 +1,32 @@
+<project default="dist">
+
+    <property name="VERSION" value="0.1" />
+
+    <target name="clean">
+        <delete dir="build" />
+        <delete dir="dist" />
+    </target>
+
+    <target name="build" depends="clean">
+        <mkdir dir="build/classes" />
+        <javac destdir="build/classes" debug="true" encoding="UTF-8">
+            <src path="src" />
+            <classpath>
+                <fileset dir="lib" includes="**/*.jar" />
+            </classpath>
+        </javac>
+        <copy todir="build/classes">
+            <fileset dir="src" />
+        </copy>
+        <jar jarfile="build/chdkptpJ-${VERSION}.jar" basedir="build/classes" />
+    </target>
+
+    <target name="dist" depends="build">
+        <mkdir dir="dist" />
+        <zip destfile="dist/chdkptpJ-${VERSION}.zip">
+            <zipfileset dir="build/" includes="chdkptpJ-${VERSION}.jar" />
+            <zipfileset dir="lib/" includes="*.jar" />
+            <zipfileset dir="." includes="COPYING" />
+        </zip>
+    </target>
+</project>
