@@ -153,8 +153,8 @@ public class ChdkConnection extends ALuaBaseLib {
             table.set("bus", Integer.toHexString(id.getBusNumber()));
             table.set("dev", Integer.toHexString(id.getDeviceAddress()));
             table.set("port", Integer.toHexString(id.getPortNumber()));
-            table.set("vendor_id", hex4(desc.idVendor()));
-            table.set("product_id", hex4(desc.idProduct()));
+            table.set("vendor_id", Camera.hex4(desc.idVendor()));
+            table.set("product_id", Camera.hex4(desc.idProduct()));
 
             if (LOG.isTraceEnabled()) {
                 LOG.trace("<< get_con_devinfo: " + LuaUtils.dumpTable(table));
@@ -477,9 +477,4 @@ public class ChdkConnection extends ALuaBaseLib {
             }
         }
     };
-
-    static String hex4(short v) {
-        String r = Integer.toHexString(UsbUtil.unsignedInt(v));
-        return "0000".substring(r.length()) + r;
-    }
 }
