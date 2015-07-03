@@ -42,12 +42,12 @@ public class TestUIProperties {
         List<Camera> cameras = CameraFactory.findCameras();
         switch (cameras.size()) {
         case 0:
-            System.out.println("There is no connected cameras");
+            System.out.println("There is no connected camera");
             return;
         case 1:
             break;
         default:
-            System.out.println("Too many connected cameras");
+            System.out.println("Too many connected cameras - need only one");
             return;
         }
         c = cameras.get(0);
@@ -87,7 +87,7 @@ public class TestUIProperties {
             String ov = initial.get(k);
             String nv = changed.get(k);
             if (!ov.equals(nv)) {
-                System.out.println("    " + k + " = " + nv);
+                System.out.println("    " + k + " = " + nv + " (initial was " + ov + ")");
             }
         }
     }
