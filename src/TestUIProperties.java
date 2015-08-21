@@ -52,6 +52,7 @@ public class TestUIProperties {
         }
         c = cameras.get(0);
         c.connect();
+        c.setRecordMode();
         System.out.println("Camera: " + c.getDevice().getManufacturerString() + "/"
                 + c.getDevice().getProductString() + " : " + c.getDevice().getSerialNumberString());
 

@@ -1,6 +1,6 @@
 <project default="dist">
 
-    <property name="VERSION" value="0.1" />
+    <property name="VERSION" value="0.2" />
 
     <target name="clean">
         <delete dir="build" />
@@ -19,12 +19,24 @@
             <fileset dir="src" />
         </copy>
         <jar jarfile="build/chdkptpJ-${VERSION}.jar" basedir="build/classes" />
+
+        <jar jarfile="build/ui-properties-check.jar" basedir="build/classes" >
+            <manifest>
+                <attribute name="Main-Class" value="TestUIPropertiesUI" />
+                <attribute name="Class-Path" value="commons-lang3-3.4.jar libusb4java-1.2.0-linux-x86.jar libusb4java-1.2.0-windows-x86_64.jar luaj-jse-3.0.1.jar usb4java-1.2.0.jar libusb4java-1.2.0-linux-arm.jar libusb4java-1.2.0-osx-x86_64.jar libusb4java-1.2.0-windows-x86.jar slf4j-api-1.7.12.jar usb4java-javax-1.2.0.jar libusb4java-1.2.0-linux-x86_64.jar libusb4java-1.2.0-osx-x86.jar log4j-1.2.17.jar slf4j-log4j12-1.7.12.jar usb-api-1.0.2.jar" />
+            </manifest>
+        </jar>
     </target>
 
     <target name="dist" depends="build">
         <mkdir dir="dist" />
         <zip destfile="dist/chdkptpJ-${VERSION}.zip">
             <zipfileset dir="build/" includes="chdkptpJ-${VERSION}.jar" />
+            <zipfileset dir="lib/" includes="*.jar" />
+            <zipfileset dir="." includes="COPYING" />
+        </zip>
+        <zip destfile="dist/ui-properties-check.zip">
+            <zipfileset dir="build/" includes="ui-properties-check.jar" />
             <zipfileset dir="lib/" includes="*.jar" />
             <zipfileset dir="." includes="COPYING" />
         </zip>
