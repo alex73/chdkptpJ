@@ -83,7 +83,7 @@ public class ChdkPtpJ {
         globals.get("table").set("maxn", maxn);
     }
 
-    public void executeCliFunction(String function, LuaTable args) throws Exception {
+    public Varargs executeCliFunction(String function, LuaTable args) throws Exception {
         LuaValue part = globals.get("cli").get("names").get(function);
         LuaValue defaultArgs = part.get("args").get("defs");
         LuaValue func = part.get("func");
@@ -91,7 +91,7 @@ public class ChdkPtpJ {
         setDefaults(args, defaultArgs);
 
         Varargs r = func.invoke(LuaValue.NIL, args);
-        System.out.println("done: " + r);
+        return r;
     }
 
     private void setDefaults(LuaValue values, LuaValue defaults) {
