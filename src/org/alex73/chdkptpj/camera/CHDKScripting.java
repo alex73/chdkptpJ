@@ -61,6 +61,10 @@ public class CHDKScripting {
         return (int) camera.executeLua("return get_focus_mode()");
     }
 
+    public int get_sd_over_modes() throws Exception {
+        return (int) camera.executeLua("return get_sd_over_modes()");
+    }
+
     /**
      * returns focus status, > 0 focus successful, =0 not successful, < 0 MF
      */
