@@ -1,6 +1,6 @@
 <project default="dist">
 
-    <property name="VERSION" value="0.2" />
+    <property name="VERSION" value="0.3" />
 
     <target name="clean">
         <delete dir="build" />
