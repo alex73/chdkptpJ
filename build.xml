@@ -19,6 +19,7 @@
             <fileset dir="src" />
         </copy>
         <jar jarfile="build/chdkptpJ-${VERSION}.jar" basedir="build/classes" />
+        <jar jarfile="build/chdkptpJ-${VERSION}-lua.jar" basedir="." includes="lua*/**"/>
 
         <jar jarfile="build/ui-properties-check.jar" basedir="build/classes" >
             <manifest>
@@ -32,6 +33,7 @@
         <mkdir dir="dist" />
         <zip destfile="dist/chdkptpJ-${VERSION}.zip">
             <zipfileset dir="build/" includes="chdkptpJ-${VERSION}.jar" />
+            <zipfileset dir="build/" includes="chdkptpJ-${VERSION}-lua.jar" />
             <zipfileset dir="lib/" includes="*.jar" />
             <zipfileset dir="." includes="COPYING" />
         </zip>
