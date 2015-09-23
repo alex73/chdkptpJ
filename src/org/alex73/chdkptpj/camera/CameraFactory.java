@@ -28,9 +28,8 @@ import java.util.Set;
 
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
-import javax.usb.UsbHostManager;
-import javax.usb.UsbHub;
-import javax.usb.UsbServices;
+
+import org.alex73.UsbUtils;
 
 /**
  * Factory for create cameras objects. It always returns list because user can connect more that one camera.
@@ -55,7 +54,7 @@ public class CameraFactory {
      */
     public static List<Camera> findCameras() throws Exception {
         List<Camera> result = new ArrayList<>();
-        for (UsbDevice device : listAllUsbDevices()) {
+        for (UsbDevice device : UsbUtils.listAllUsbDevices()) {
             UsbDeviceDescriptor desc = device.getUsbDeviceDescriptor();
             if (KNOWN_VENDOR == desc.idVendor() && KNOWN_PRODUCTS.contains(desc.idProduct())) {
                 result.add(new Camera(device));
@@ -69,35 +68,12 @@ public class CameraFactory {
      */
     public static Collection<Camera> findCameras(short vendor, short product) throws Exception {
         List<Camera> result = new ArrayList<>();
-        for (UsbDevice device : listAllUsbDevices()) {
+        for (UsbDevice device : UsbUtils.listAllUsbDevices()) {
             UsbDeviceDescriptor desc = device.getUsbDeviceDescriptor();
             if (vendor == desc.idVendor() && product == desc.idProduct()) {
                 result.add(new Camera(device));
             }
         }
         return result;
-    }
-
-    /**
-     * List all USB devices except hubs.
-     */
-    private static List<UsbDevice> listAllUsbDevices() throws Exception {
-        UsbServices services = UsbHostManager.getUsbServices();
-        UsbHub rootHub = services.getRootUsbHub();
-        List<UsbDevice> devices = new ArrayList<UsbDevice>();
-        listAllUsbDevices(rootHub, devices);
-        return devices;
-    }
-
-    private static void listAllUsbDevices(UsbHub hub, List<UsbDevice> devices) {
-        @SuppressWarnings("unchecked")
-        List<UsbDevice> hubDevices = hub.getAttachedUsbDevices();
-        for (UsbDevice usbDevice : hubDevices) {
-            if (usbDevice.isUsbHub()) {
-                listAllUsbDevices((UsbHub) usbDevice, devices);
-            } else {
-                devices.add(usbDevice);
-            }
-        }
     }
 }

@@ -26,6 +26,7 @@ import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.util.UsbUtil;
 
+import org.alex73.UsbUtils;
 import org.alex73.chdkptpj.camera.Camera;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK.PairValues;
@@ -153,8 +154,8 @@ public class ChdkConnection extends ALuaBaseLib {
             table.set("bus", Integer.toHexString(id.getBusNumber()));
             table.set("dev", Integer.toHexString(id.getDeviceAddress()));
             table.set("port", Integer.toHexString(id.getPortNumber()));
-            table.set("vendor_id", Camera.hex4(desc.idVendor()));
-            table.set("product_id", Camera.hex4(desc.idProduct()));
+            table.set("vendor_id", UsbUtils.hex4(desc.idVendor()));
+            table.set("product_id", UsbUtils.hex4(desc.idProduct()));
 
             if (LOG.isTraceEnabled()) {
                 LOG.trace("<< get_con_devinfo: " + LuaUtils.dumpTable(table));

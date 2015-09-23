@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.usb.UsbDevice;
-import javax.usb.util.UsbUtil;
 
 import org.alex73.chdkptpj.camera.lowlevel.CHDKScreenImage;
 import org.alex73.chdkptpj.camera.lowlevel.PTP_CHDK;
@@ -233,10 +232,5 @@ public class Camera {
 
     public int getCaptureSupportedFormats() {
         return captureSupportedFormats;
-    }
-
-    public static String hex4(short v) {
-        String r = Integer.toHexString(UsbUtil.unsignedInt(v));
-        return "0000".substring(r.length()) + r;
     }
 }
